@@ -1,9 +1,9 @@
 from fastapi import APIRouter,Request,HTTPException,Depends
 from fastapi.responses import Response,JSONResponse
+from sqlalchemy import not_
 from db import Session,get_db
 from db_models.book import Book
 from models.bookmodel import *
-import json
 
 router = APIRouter()
 
@@ -29,8 +29,23 @@ def get_all_books(offset:int=0,limit:int=10,db:Session=Depends(get_db)):
     return books
 
 @router.get("/getByName",response_model=list[allInfo])
-def get_all_books(offset:int=0,limit:int=10,name:str="",db:Session=Depends(get_db)):
-    books=db.query(Book).filter(Book.name.ilike(f"%{name}%")).offset(offset).limit(limit).all()
+def get_all_books(offset:int=0, 
+                  limit:int=10,
+                  name:str="",
+                  mangas:bool=None,
+                  comics:bool=None,
+                  stock:bool=None,
+                  adult:bool=None, 
+                  db:Session=Depends(get_db)):
+    books=(db.query(Book).filter(Book.name.ilike(f"%{name}%"))
+    .filter(Book.type.ilike("%Manga%") if mangas else Book.type.ilike("%%"))
+    .filter(Book.type.ilike("%Comic%") if comics else Book.type.ilike("%%")))
+    
+    if stock is not None:
+        books=books.filter(Book.quantity>0 if stock else Book.quantity<1)
+    if adult is not None:
+        books=books.filter(Book.adult==adult)
+    books=books.offset(offset).limit(limit).all()
     return books
 
 @router.get("/recent",response_model=list[allInfo])
