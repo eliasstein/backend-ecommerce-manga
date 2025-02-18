@@ -32,14 +32,12 @@ def get_all_books(offset:int=0,limit:int=10,db:Session=Depends(get_db)):
 def get_all_books(offset:int=0, 
                   limit:int=10,
                   name:str="",
-                  mangas:bool=None,
-                  comics:bool=None,
+                  type:str=None,
                   stock:bool=None,
                   adult:bool=None, 
                   db:Session=Depends(get_db)):
     books=(db.query(Book).filter(Book.name.ilike(f"%{name}%"))
-    .filter(Book.type.ilike("%Manga%") if mangas else Book.type.ilike("%%"))
-    .filter(Book.type.ilike("%Comic%") if comics else Book.type.ilike("%%")))
+    .filter(Book.type.ilike(f"%{type}%") if type else Book.type.ilike("%%")))
     
     if stock is not None:
         books=books.filter(Book.quantity>0 if stock else Book.quantity<1)
@@ -47,6 +45,13 @@ def get_all_books(offset:int=0,
         books=books.filter(Book.adult==adult)
     books=books.offset(offset).limit(limit).all()
     return books
+
+@router.get("/getById",response_model=allInfo)
+def get_all_books(id:int=0,db:Session=Depends(get_db)):
+    book=db.query(Book).get(id)
+    return book
+
+
 
 @router.get("/recent",response_model=list[allInfo])
 def get_recent_book(offset:int=0,limit:int=10,db:Session=Depends(get_db)):
