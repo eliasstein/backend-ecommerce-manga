@@ -38,7 +38,6 @@ def get_all_books(offset:int=0,
                   db:Session=Depends(get_db)):
     books=(db.query(Book).filter(Book.name.ilike(f"%{name}%"))
     .filter(Book.type.ilike(f"%{type}%") if type else Book.type.ilike("%%")))
-    
     if stock is not None:
         books=books.filter(Book.quantity>0 if stock else Book.quantity<1)
     if adult is not None:
