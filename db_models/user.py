@@ -1,19 +1,18 @@
 from db import Base
-from sqlalchemy import Column, Integer, String  #Para creacion de modelos
+from sqlalchemy import Column, Integer, String, ForeignKey  #Para creacion de modelos
 
 
 class User(Base):
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
+    user_id = Column(Integer, primary_key=True, autoincrement=True)
+    rol_id=Column(Integer, ForeignKey("roles.rol_id"))
     username = Column(String)
-    email = Column(String)
+    email = Column(String, unique=True)
     password = Column(String)
-
-    def __repr__(self):
-        return f"User(id={self.id}, name='{self.name}',email='{self.email},password='{self.password}')"
     
-    def __init__(self,username,email,password):
+    def __init__(self,rol_id,username,email,password):
+        self.rol_id=rol_id
         self.username=username
         self.email=email
         self.password=password

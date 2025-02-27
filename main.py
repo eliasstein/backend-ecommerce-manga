@@ -5,6 +5,7 @@ from db import Base,get_db,engine               #Conexion con la bd
 from routes.api import router as api_router
 
 #Importamos los modelos para que se creen en la bd
+from db_models.roles import Rol
 from db_models.user import User
 from db_models.book import Book
 
