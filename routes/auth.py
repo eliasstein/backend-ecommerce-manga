@@ -5,6 +5,7 @@ from db import Session,get_db
 from db_models.user import User
 from utils.security import Security
 import bcrypt
+from datetime import datetime,timedelta
 
 router = APIRouter()
 
@@ -33,14 +34,18 @@ def login_user(user: login, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Credenciales inválidas")
     if user.remember:
         return {"message": "Inicio de sesión exitoso",
-                "access_token":Security.generate_token({"email":user.email,
-                                                        "rol":db_user.rol_id},0,1, False),
-                "refresh_token":Security.generate_token({"email":user.email},0,30, True)}
+                "access_token":f"access_token={Security.generate_token(
+                    {"email":user.email,
+                     "rol":db_user.rol_id},0,1, False)};Max-Age=86400; path=/",
+                "refresh_token":f"refresh_token={Security.generate_token({"email":user.email},0,30, True)}; path=/"
+                }
     
     #Si no tiene el boton de remember activado entonces retornamos un Access_token simple
     return {"message": "Inicio de sesión exitoso",
-            "access_token":Security.generate_token({"email":user.email,
-                                                    "rol":db_user.rol_id},0,1, False)}
+            "access_token":f"access_token={Security.generate_token(
+                {"email":user.email,
+                    "rol":db_user.rol_id},0,1, False)};Max-Age=86400; path=/",
+            }
 
 #Ejemplo de como validar el token
 @router.get('/verify')
