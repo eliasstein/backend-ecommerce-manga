@@ -37,7 +37,8 @@ def login_user(user: login, db: Session = Depends(get_db)):
                 "access_token":f"access_token={Security.generate_token(
                     {"email":user.email,
                      "rol":db_user.rol_id},0,1, False)};Max-Age=86400; path=/",
-                "refresh_token":f"refresh_token={Security.generate_token({"email":user.email},0,30, True)}; path=/"
+                "refresh_token":f"refresh_token={Security.generate_token({"email":user.email,
+                                                                          "rol":db_user.rol_id},0,30, True)}; path=/"
                 }
     
     #Si no tiene el boton de remember activado entonces retornamos un Access_token simple
@@ -48,7 +49,9 @@ def login_user(user: login, db: Session = Depends(get_db)):
             }
 
 #Ejemplo de como validar el token
-@router.get('/verify')
+@router.get('/verify',
+            description="Verifica el token que se envia en el header (Authorization) y devuelve si es valido o no")
+
 def verifyToken(request:Request):
     #Almacenamos los datos del token o el error si existe
     token=Security.verify_token(request.headers, False)
@@ -58,3 +61,10 @@ def verifyToken(request:Request):
     #Si es True continuamos con el codigo
     #Si la ip existe en el diccionario de intentos entonces la borramos
     return {"message":f"Token verificado con exito","token":token}
+
+@router.get("/refresh")
+def refreshToken(request:Request):
+    token=Security.refresh_token(request.headers)
+    if token["success"]==False:
+        return token
+    return {"message":f"Token refrescado con exito","token":token}

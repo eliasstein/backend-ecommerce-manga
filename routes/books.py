@@ -2,13 +2,17 @@ from fastapi import APIRouter,Request,HTTPException,Depends
 from fastapi.responses import Response,JSONResponse
 from sqlalchemy import not_
 from db import Session,get_db
+from utils.security import decode_token
 from db_models.book import Book
 from models.bookmodel import *
 
 router = APIRouter()
 
-@router.post("/register", response_model=allInfo)
-def register_book(book:registerBook,db:Session=Depends(get_db)):
+@router.post("/register", response_model=allInfo, description="Nota: Requiere de un Access token enviado como Bearer token en el encabezado con el rol de administrador para poder ser utilizado")
+def register_book(book:registerBook,db:Session=Depends(get_db), dependencies=Depends(decode_token)):
+    if dependencies["rol"]!=1:
+        raise HTTPException(status_code=401, detail="El usuario no es administrador")
+    
     db_book=Book(book.type,
                  book.name,
                  book.description,

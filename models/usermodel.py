@@ -5,17 +5,11 @@ class register(BaseModel):
     email:EmailStr
     password:str
 
-
 class login(BaseModel):
     email:EmailStr
     password:str
     remember:bool
 
-class token(BaseModel):
-    token:str
-
-class findById(BaseModel):
-    email:EmailStr
-    isAdmin:StrictBool
-    password:str
+class getByToken(BaseModel):
     username:str
+    email:EmailStr
